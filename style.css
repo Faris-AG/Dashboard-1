@@ -466,58 +466,100 @@ ul {
 /* ===         DESAIN RESPONSIVE         === */
 /* ========================================= */
 
-/* Aturan ini akan berlaku untuk layar dengan lebar 768px atau kurang (ukuran tablet & mobile) */
+/* Aturan ini akan berlaku untuk layar dengan lebar 768px atau kurang */
 @media (max-width: 768px) {
-  /* 1. Mengubah layout utama dari menyamping menjadi vertikal (atas-bawah) */
+  /* --- Tata Letak Utama --- */
   .container {
     flex-direction: column;
   }
 
-  /* 2. Menyesuaikan sidebar agar menjadi seperti header bar di atas */
+  /* --- Menu Hamburger & Sidebar Geser --- */
+
+  /* Tampilkan tombol hamburger */
+  .hamburger-menu {
+    display: block;
+  }
+
+  /* Tampilkan tombol close di dalam sidebar */
+  #close-sidebar-btn {
+    display: block;
+  }
+
+  /* Ini adalah bagian UTAMA perbaikan.
+    Sidebar diubah menjadi menu geser (slide-in) dari samping.
+  */
   .sidebar {
-    width: 100%;
-    min-height: auto; /* Hapus tinggi minimum agar ukurannya pas */
-    height: auto;
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 250px;
+    z-index: 1000;
+    /* Sembunyikan sidebar ke kiri layar secara default */
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    /* Menghapus aturan yang konflik seperti justify-content atau padding horizontal */
   }
 
-  /* Menyembunyikan menu dropdown di mobile untuk simpel (opsional, bisa dikembangkan dengan menu hamburger) */
-  .sidebar-nav {
-    display: none;
+  /* Kelas .sidebar-open ini yang akan memunculkan sidebar */
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
   }
+
+  /* Mengembalikan header sidebar ke tampilan aslinya (vertikal) */
   .sidebar-header {
-    border-bottom: none; /* Hapus border bawah di header sidebar */
-    text-align: left;
-    padding-left: 20px;
+    text-align: center; /* Logo kembali ke tengah */
+    padding: 20px; /* Kembalikan padding */
+    border-bottom: 1px solid var(--border-color); /* Tampilkan lagi border pemisah */
   }
 
-  /* 3. Menumpuk judul halaman dan tombol "Tambah Data" secara vertikal */
+  /* Mengembalikan item navigasi agar tampil vertikal (atas-bawah), 
+    bukan horizontal (menyamping)
+  */
+  .sidebar-nav ul {
+    display: block; /* Hapus display: flex */
+    padding-top: 20px; /* Kembalikan padding atas */
+  }
+
+  .sidebar-nav li a {
+    padding: 15px 20px; /* Kembalikan padding asli */
+    border-bottom: 1px solid #34495e; /* Tampilkan lagi border pemisah */
+  }
+
+  /* Pastikan dropdown berfungsi normal di dalam sidebar geser */
+  .sidebar-nav .dropdown-menu,
+  .nav-dropdown .dropdown-toggle::after {
+    display: block; /* Pastikan terlihat */
+  }
+
+  /* --- Tata Letak Konten Lainnya --- */
+
+  /* Menumpuk judul halaman dan tombol "Tambah" */
   .content-header {
     flex-direction: column;
-    align-items: flex-start; /* Ratakan semua ke kiri */
-    gap: 15px; /* Beri jarak antara judul dan tombol */
+    align-items: flex-start;
+    gap: 15px;
   }
 
-  /* 4. Membuat tombol "Tambah" memenuhi lebar layar agar mudah disentuh */
+  /* Membuat tombol "Tambah" memenuhi lebar layar */
   .content-header .btn-primary {
     width: 100%;
-    padding: 12px;
-    font-size: 16px;
   }
 
-  /* 5. Mengurangi padding pada konten utama agar lebih lega di layar kecil */
   .content {
     padding: 15px;
   }
+}
 
-  /* 6. Mengurangi ukuran font judul utama di mobile */
-  .content h1 {
-    font-size: 1.8rem;
-  }
+/* 6. Mengurangi ukuran font judul utama di mobile */
+.content h1 {
+  font-size: 1.8rem;
+}
 
-  /* 7. Memberi sedikit padding pada footer */
-  .footer {
-    padding: 15px;
-  }
+/* 7. Memberi sedikit padding pada footer */
+.footer {
+  padding: 15px;
 }
 
 /* ========================================= */
