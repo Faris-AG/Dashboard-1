@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Akademik</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <h2>Akademik</h2>
+        </div>
+        <nav class="sidebar-nav">
+          <ul>
+            <li><a href="index.html">Beranda</a></li>
+            <li class="nav-dropdown">
+              <a href="#" class="dropdown-toggle">Data</a>
+              <ul class="dropdown-menu">
+                <li><a href="data-siswa.html">Siswa</a></li>
+                <li><a href="data-kelas.html">Kelas</a></li>
+                <li><a href="data-jurusan.html">Jurusan</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <main class="main-content">
+        <header class="header">
+          <div class="header-logo">
+            <h3>Dashboard</h3>
+          </div>
+          <div class="header-profile">
+            <div class="profile-icon">P</div>
+            <span>Admin</span>
+          </div>
+        </header>
+
+        <section class="content">
+          <h1>Selamat Datang di Dashboard Akademik!</h1>
+          <p>Pilih menu di samping untuk mengelola data.</p>
+
+          <div class="card-container">
+            <div class="card">
+              <h3>Jumlah Siswa</h3>
+              <p id="jumlah-siswa">0</p>
+            </div>
+            <div class="card">
+              <h3>Jumlah Kelas</h3>
+              <p id="jumlah-kelas">0</p>
+            </div>
+            <div class="card">
+              <h3>Jumlah Jurusan</h3>
+              <p id="jumlah-jurusan">0</p>
+            </div>
+          </div>
+        </section>
+
+        <footer class="footer">
+          <p>Copyright &copy; 2025 10 PPLG 3</p>
+        </footer>
+      </main>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // --- Logika untuk Dropdown Sidebar ---
+        const dropdownToggle = document.querySelector(".dropdown-toggle");
+        if (dropdownToggle) {
+          dropdownToggle.addEventListener("click", function (event) {
+            event.preventDefault();
+            const parent = this.parentElement;
+            parent.classList.toggle("active");
+          });
+        }
+
+        // --- Logika untuk Menghitung Data di Dashboard ---
+
+        // 1. Pilih elemen paragraf tempat angka akan ditampilkan
+        const elJumlahSiswa = document.getElementById("jumlah-siswa");
+        const elJumlahKelas = document.getElementById("jumlah-kelas");
+        const elJumlahJurusan = document.getElementById("jumlah-jurusan");
+
+        // 2. Buat fungsi untuk mengambil & menghitung data dari localStorage
+        function updateDashboardCounts() {
+          // Menghitung jumlah siswa
+          // Ambil data dari localStorage, jika tidak ada, anggap sebagai array kosong []
+          const dataSiswa = JSON.parse(localStorage.getItem("dataSiswa")) || [];
+          elJumlahSiswa.textContent = dataSiswa.length;
+
+          // Menghitung jumlah kelas
+          const dataKelas = JSON.parse(localStorage.getItem("dataKelas")) || [];
+          elJumlahKelas.textContent = dataKelas.length;
+
+          // Menghitung jumlah jurusan
+          const dataJurusan =
+            JSON.parse(localStorage.getItem("dataJurusan")) || [];
+          elJumlahJurusan.textContent = dataJurusan.length;
+        }
+
+        // 3. Panggil fungsi saat halaman selesai dimuat
+        updateDashboardCounts();
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Jurusan - Dashboard Akademik</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style3.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <h2>Akademik</h2>
+        </div>
+        <nav class="sidebar-nav">
+          <ul>
+            <li><a href="index.html">Beranda</a></li>
+            <li class="nav-dropdown active">
+              <a href="#" class="dropdown-toggle">Data</a>
+              <ul class="dropdown-menu">
+                <li><a href="data-siswa.html">Siswa</a></li>
+                <li><a href="data-kelas.html">Kelas</a></li>
+                <li>
+                  <a href="data-jurusan.html" class="active">Jurusan</a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <main class="main-content">
+        <header class="header">
+          <div class="header-logo">
+            <h3>Data Jurusan</h3>
+          </div>
+          <div class="header-profile">
+            <div class="profile-icon">P</div>
+            <span>Admin</span>
+          </div>
+        </header>
+
+        <section class="content">
+          <div class="content-header">
+            <h1>Manajemen Data Jurusan</h1>
+            <button id="btnTambahJurusan" class="btn btn-primary">
+              Tambah Jurusan
+            </button>
+          </div>
+
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Kode Jurusan</th>
+                  <th>Nama Jurusan</th>
+                  <th>Kepala Jurusan</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <footer class="footer">
+          <p>Copyright &copy; 2025 10 PPLG 3</p>
+        </footer>
+      </main>
+    </div>
+
+    <div class="modal-overlay" id="jurusanModalOverlay">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 id="modalTitle">Tambah Jurusan Baru</h2>
+          <button class="close-button" id="closeModalButton">&times;</button>
+        </div>
+        <form id="jurusanForm">
+          <input type="hidden" id="editRowIndex" />
+          <div class="form-group">
+            <label for="kodeJurusan">Kode Jurusan</label>
+            <input
+              type="text"
+              id="kodeJurusan"
+              required
+              placeholder="Contoh: PPLG"
+            />
+          </div>
+          <div class="form-group">
+            <label for="namaJurusan">Nama Jurusan</label>
+            <input
+              type="text"
+              id="namaJurusan"
+              required
+              placeholder="Contoh: Pengembangan Perangkat Lunak & Gim"
+            />
+          </div>
+          <div class="form-group">
+            <label for="kepalaJurusan">Kepala Jurusan</label>
+            <input
+              type="text"
+              id="kepalaJurusan"
+              required
+              placeholder="Contoh: Dr. John Doe"
+            />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn" id="btnBatal">Batal</button>
+            <button type="submit" class="btn btn-primary">Simpan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // --- Bagian Dropdown Sidebar (Tidak Berubah) ---
+        const dropdownToggle = document.querySelector(".dropdown-toggle");
+        if (dropdownToggle) {
+          dropdownToggle.addEventListener("click", function (event) {
+            event.preventDefault();
+            this.parentElement.classList.toggle("active");
+          });
+        }
+
+        // --- Variabel Global untuk DOM ---
+        const dataTable = document.querySelector(".data-table tbody");
+        const localStorageKey = "dataJurusan";
+
+        // --- Variabel untuk Modal Form ---
+        const modalOverlay = document.getElementById("jurusanModalOverlay");
+        const jurusanForm = document.getElementById("jurusanForm");
+        const modalTitle = document.getElementById("modalTitle");
+        const btnTambahJurusan = document.getElementById("btnTambahJurusan");
+        const closeModalButton = document.getElementById("closeModalButton");
+        const btnBatal = document.getElementById("btnBatal");
+        const editRowIndexInput = document.getElementById("editRowIndex");
+        const kodeJurusanInput = document.getElementById("kodeJurusan");
+        const namaJurusanInput = document.getElementById("namaJurusan");
+        const kepalaJurusanInput = document.getElementById("kepalaJurusan");
+
+        // --- Fungsi Utama Local Storage ---
+
+        /**
+         * Merender ulang tabel dari array data.
+         */
+        function renderTabel(data) {
+          dataTable.innerHTML = ""; // Kosongkan tabel
+          data.forEach((item, index) => {
+            const newRow = dataTable.insertRow();
+            newRow.innerHTML = `
+              <td>${index + 1}</td>
+              <td>${item.kode}</td>
+              <td>${item.nama}</td>
+              <td>${item.kepala}</td>
+              <td>
+                <button class="btn btn-edit">Edit</button>
+                <button class="btn btn-delete">Hapus</button>
+              </td>
+            `;
+          });
+        }
+
+        /**
+         * Mengambil data dari Local Storage.
+         */
+        function getData() {
+          const dataTersimpan = localStorage.getItem(localStorageKey);
+          return dataTersimpan ? JSON.parse(dataTersimpan) : [];
+        }
+
+        /**
+         * Menyimpan data ke Local Storage.
+         */
+        function simpanData(data) {
+          localStorage.setItem(localStorageKey, JSON.stringify(data));
+        }
+
+        // --- Logika Modal ---
+
+        /**
+         * Membuka modal.
+         */
+        function bukaModal() {
+          modalOverlay.classList.add("show");
+        }
+
+        /**
+         * Menutup modal dan mereset form.
+         */
+        function tutupModal() {
+          modalOverlay.classList.remove("show");
+          jurusanForm.reset(); // Kosongkan input
+          editRowIndexInput.value = ""; // Hapus index edit
+        }
+
+        // --- Logika CRUD (Create, Read, Update, Delete) ---
+
+        /**
+         * Menyiapkan form untuk menambah data baru.
+         */
+        function aksiTambah() {
+          modalTitle.textContent = "Tambah Jurusan Baru";
+          bukaModal();
+        }
+
+        /**
+         * Menyiapkan form untuk mengedit data yang ada.
+         * @param {HTMLElement} button - Tombol edit yang diklik.
+         */
+        function aksiEdit(button) {
+          const row = button.closest("tr");
+          const cells = row.querySelectorAll("td");
+          const rowIndex = Array.from(dataTable.children).indexOf(row);
+
+          // Isi form dengan data dari baris tabel
+          kodeJurusanInput.value = cells[1].textContent;
+          namaJurusanInput.value = cells[2].textContent;
+          kepalaJurusanInput.value = cells[3].textContent;
+          editRowIndexInput.value = rowIndex; // Simpan index baris
+
+          modalTitle.textContent = "Edit Data Jurusan";
+          bukaModal();
+        }
+
+        /**
+         * Menghapus data dari tabel dan Local Storage.
+         * @param {HTMLElement} button - Tombol hapus yang diklik.
+         */
+        function aksiHapus(button) {
+          const row = button.closest("tr");
+          const namaJurusan = row.querySelector("td:nth-child(3)").textContent;
+
+          if (
+            confirm(
+              `Apakah Anda yakin ingin menghapus data jurusan ${namaJurusan}?`
+            )
+          ) {
+            const data = getData();
+            const rowIndex = Array.from(dataTable.children).indexOf(row);
+            data.splice(rowIndex, 1); // Hapus data dari array
+            simpanData(data); // Simpan array yang sudah diperbarui
+            renderTabel(data); // Render ulang tabel
+          }
+        }
+
+        // --- Event Listeners ---
+
+        // Listener untuk tombol "Tambah Jurusan"
+        btnTambahJurusan.addEventListener("click", aksiTambah);
+
+        // Listener untuk tombol-tombol di dalam modal
+        closeModalButton.addEventListener("click", tutupModal);
+        btnBatal.addEventListener("click", tutupModal);
+        modalOverlay.addEventListener("click", (event) => {
+          // Tutup modal hanya jika klik dilakukan di area overlay (luar modal)
+          if (event.target === modalOverlay) {
+            tutupModal();
+          }
+        });
+
+        // Listener untuk submit form (menambah atau mengedit)
+        jurusanForm.addEventListener("submit", function (event) {
+          event.preventDefault(); // Mencegah form dari refresh halaman
+
+          const dataJurusan = {
+            kode: kodeJurusanInput.value.trim(),
+            nama: namaJurusanInput.value.trim(),
+            kepala: kepalaJurusanInput.value.trim(),
+          };
+
+          const data = getData();
+          const editIndex = editRowIndexInput.value;
+
+          if (editIndex !== "") {
+            // Mode Edit: perbarui data di index yang ada
+            data[editIndex] = dataJurusan;
+          } else {
+            // Mode Tambah: tambahkan data baru ke array
+            data.push(dataJurusan);
+          }
+
+          simpanData(data);
+          renderTabel(data);
+          tutupModal();
+        });
+
+        // Listener untuk tombol "Edit" dan "Hapus" pada tabel
+        dataTable.addEventListener("click", function (event) {
+          if (event.target.classList.contains("btn-edit")) {
+            aksiEdit(event.target);
+          } else if (event.target.classList.contains("btn-delete")) {
+            aksiHapus(event.target);
+          }
+        });
+
+        // --- Inisialisasi Aplikasi ---
+        function init() {
+          const data = getData();
+          renderTabel(data);
+        }
+
+        init(); // Panggil fungsi inisialisasi saat halaman dimuat
+      });
+    </script>
+  </body>
+</html>

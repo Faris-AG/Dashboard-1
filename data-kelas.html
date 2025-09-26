@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Kelas - Dashboard Akademik</title>
+    <link rel="stylesheet" href="style2.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <h2>Akademik</h2>
+        </div>
+        <nav class="sidebar-nav">
+          <ul>
+            <li><a href="index.html">Beranda</a></li>
+            <li class="nav-dropdown active">
+              <a href="#" class="dropdown-toggle">Data</a>
+              <ul class="dropdown-menu">
+                <li><a href="data-siswa.html">Siswa</a></li>
+                <li><a href="data-kelas.html" class="active">Kelas</a></li>
+                <li><a href="data-jurusan.html">Jurusan</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <main class="main-content">
+        <header class="header">
+          <div class="header-logo">
+            <h3>Data Kelas</h3>
+          </div>
+          <div class="header-profile">
+            <div class="profile-icon">P</div>
+            <span>Admin</span>
+          </div>
+        </header>
+
+        <section class="content">
+          <div class="content-header">
+            <h1>Manajemen Data Kelas</h1>
+            <button class="btn btn-primary" id="btn-tambah-kelas">
+              Tambah Kelas
+            </button>
+          </div>
+
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Nama Kelas</th>
+                  <th>Wali Kelas</th>
+                  <th>Jumlah Siswa</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <footer class="footer">
+          <p>Copyright &copy; 2025 10 PPLG 3</p>
+        </footer>
+      </main>
+    </div>
+
+    <div class="modal-overlay" id="form-modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modal-title">Form Data Kelas</h2>
+          <button class="close-button" id="close-modal">&times;</button>
+        </div>
+        <form id="kelas-form">
+          <input type="hidden" id="edit-row-index" />
+          <div class="form-group">
+            <label for="nama-kelas">Nama Kelas</label>
+            <input type="text" id="nama-kelas" required />
+          </div>
+          <div class="form-group">
+            <label for="wali-kelas">Wali Kelas</label>
+            <input type="text" id="wali-kelas" required />
+          </div>
+          <div class="form-group">
+            <label for="jumlah-siswa">Jumlah Siswa</label>
+            <input type="number" id="jumlah-siswa" required />
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-cancel" id="btn-batal">
+              Batal
+            </button>
+            <button type="submit" class="btn btn-primary">Simpan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      // Seluruh kode JavaScript tetap di sini, tidak ada perubahan
+      document.addEventListener("DOMContentLoaded", function () {
+        // --- [START] Deklarasi Variabel DOM ---
+        const dropdownToggle = document.querySelector(".dropdown-toggle");
+        const dataTable = document.querySelector(".data-table tbody");
+        const btnTambahKelas = document.getElementById("btn-tambah-kelas");
+
+        // Variabel untuk Modal
+        const modalOverlay = document.getElementById("form-modal-overlay");
+        const modalTitle = document.getElementById("modal-title");
+        const closeModalBtn = document.getElementById("close-modal");
+        const cancelBtn = document.getElementById("btn-batal");
+        const kelasForm = document.getElementById("kelas-form");
+
+        // Variabel untuk Form Input
+        const editRowIndexInput = document.getElementById("edit-row-index");
+        const namaKelasInput = document.getElementById("nama-kelas");
+        const waliKelasInput = document.getElementById("wali-kelas");
+        const jumlahSiswaInput = document.getElementById("jumlah-siswa");
+        // --- [END] Deklarasi Variabel DOM ---
+
+        // --- [START] Fungsi Utama Local Storage & Render Tabel ---
+        function muatData() {
+          const dataTersimpan = localStorage.getItem("dataKelas");
+          dataTable.innerHTML = ""; // Kosongkan tabel sebelum memuat
+
+          // Data contoh jika local storage kosong
+          let data = dataTersimpan
+            ? JSON.parse(dataTersimpan)
+            : [
+                {
+                  namaKelas: "10 PPLG 3",
+                  waliKelas: "Drs. John Doe",
+                  jumlahSiswa: "36",
+                },
+                {
+                  namaKelas: "11 TJKT 1",
+                  waliKelas: "Jane Smith, S.Kom",
+                  jumlahSiswa: "35",
+                },
+                {
+                  namaKelas: "12 DKV 2",
+                  waliKelas: "Michael Bayu, S.Ds",
+                  jumlahSiswa: "34",
+                },
+              ];
+
+          data.forEach((item) => {
+            tambahBarisKeTabel(item);
+          });
+          perbaruiNomorUrut();
+          // Simpan data contoh jika local storage awalnya kosong
+          if (!dataTersimpan) {
+            simpanData();
+          }
+        }
+
+        function simpanData() {
+          const rows = dataTable.querySelectorAll("tr");
+          const dataUntukDisimpan = [];
+          rows.forEach((row) => {
+            const cells = row.querySelectorAll("td");
+            const dataKelas = {
+              namaKelas: cells[1].textContent,
+              waliKelas: cells[2].textContent,
+              jumlahSiswa: cells[3].textContent,
+            };
+            dataUntukDisimpan.push(dataKelas);
+          });
+          localStorage.setItem("dataKelas", JSON.stringify(dataUntukDisimpan));
+        }
+
+        function tambahBarisKeTabel(data) {
+          const newRow = dataTable.insertRow();
+          newRow.innerHTML = `
+            <td></td> <td>${data.namaKelas}</td>
+            <td>${data.waliKelas}</td>
+            <td>${data.jumlahSiswa}</td>
+            <td>
+              <button class="btn btn-edit">Edit</button>
+              <button class="btn btn-delete">Hapus</button>
+            </td>
+          `;
+        }
+
+        function perbaruiNomorUrut() {
+          const rows = dataTable.querySelectorAll("tr");
+          rows.forEach((row, index) => {
+            row.querySelector("td:first-child").textContent = index + 1;
+          });
+        }
+        // --- [END] Fungsi Utama Local Storage & Render Tabel ---
+
+        // --- [START] Logika Modal & Form ---
+        function tampilkanModal() {
+          modalOverlay.classList.add("active");
+        }
+
+        function sembunyikanModal() {
+          modalOverlay.classList.remove("active");
+        }
+
+        btnTambahKelas.addEventListener("click", function () {
+          kelasForm.reset(); // Kosongkan form
+          editRowIndexInput.value = ""; // Pastikan mode tambah
+          modalTitle.textContent = "Tambah Kelas Baru";
+          tampilkanModal();
+        });
+
+        closeModalBtn.addEventListener("click", sembunyikanModal);
+        cancelBtn.addEventListener("click", sembunyikanModal);
+        modalOverlay.addEventListener("click", function (event) {
+          if (event.target === modalOverlay) {
+            sembunyikanModal();
+          }
+        });
+
+        kelasForm.addEventListener("submit", function (event) {
+          event.preventDefault(); // Mencegah form submit default
+
+          const dataBaru = {
+            namaKelas: namaKelasInput.value,
+            waliKelas: waliKelasInput.value,
+            jumlahSiswa: jumlahSiswaInput.value,
+          };
+
+          const rowIndex = editRowIndexInput.value;
+
+          if (rowIndex === "") {
+            // Mode Tambah
+            tambahBarisKeTabel(dataBaru);
+          } else {
+            // Mode Edit
+            const row = dataTable.rows[parseInt(rowIndex)];
+            row.cells[1].textContent = dataBaru.namaKelas;
+            row.cells[2].textContent = dataBaru.waliKelas;
+            row.cells[3].textContent = dataBaru.jumlahSiswa;
+          }
+
+          perbaruiNomorUrut();
+          simpanData();
+          sembunyikanModal();
+        });
+        // --- [END] Logika Modal & Form ---
+
+        // --- [START] Logika Aksi Edit & Hapus ---
+        dataTable.addEventListener("click", function (event) {
+          const target = event.target;
+          const row = target.closest("tr");
+          if (!row) return;
+
+          if (target.classList.contains("btn-edit")) {
+            // Ambil data dari baris yang diklik
+            const cells = row.querySelectorAll("td");
+            namaKelasInput.value = cells[1].textContent;
+            waliKelasInput.value = cells[2].textContent;
+            jumlahSiswaInput.value = cells[3].textContent;
+
+            // Simpan index baris (dimulai dari 0)
+            editRowIndexInput.value = row.rowIndex - 1;
+
+            modalTitle.textContent = "Edit Data Kelas";
+            tampilkanModal();
+          } else if (target.classList.contains("btn-delete")) {
+            const namaKelas = row.querySelector("td:nth-child(2)").textContent;
+            if (
+              confirm(
+                `Apakah Anda yakin ingin menghapus data kelas ${namaKelas}?`
+              )
+            ) {
+              row.remove();
+              perbaruiNomorUrut();
+              simpanData();
+            }
+          }
+        });
+        // --- [END] Logika Aksi Edit & Hapus ---
+
+        // --- Inisialisasi awal ---
+        if (dropdownToggle) {
+          dropdownToggle.addEventListener("click", function (event) {
+            event.preventDefault();
+            this.parentElement.classList.toggle("active");
+          });
+        }
+        muatData(); // Muat data saat halaman dibuka
+      });
+    </script>
+  </body>
+</html>
