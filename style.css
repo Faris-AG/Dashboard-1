@@ -165,6 +165,28 @@ ul {
   margin-bottom: 20px;
 }
 
+/* --- Search Bar Styling --- */
+.search-container {
+  margin-bottom: 20px;
+}
+
+#search-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  box-sizing: border-box;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+#search-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 5px rgba(0, 188, 212, 0.4);
+}
+
 /* --- Card Styling (untuk Dashboard) --- */
 .card-container {
   display: grid;
@@ -218,7 +240,7 @@ ul {
 }
 
 .btn-primary:hover {
-  background-color: #00acc1; /* Warna hover sedikit lebih gelap dari accent */
+  background-color: #00acc1;
 }
 
 .btn-edit {
@@ -228,7 +250,7 @@ ul {
 }
 
 .btn-edit:hover {
-  background-color: #ffb300; /* Warna hover untuk kuning */
+  background-color: #ffb300;
 }
 
 .btn-delete {
@@ -237,7 +259,7 @@ ul {
 }
 
 .btn-delete:hover {
-  background-color: #e53935; /* Warna hover untuk merah */
+  background-color: #e53935;
 }
 
 /* --- Data Table Styling --- */
@@ -271,7 +293,7 @@ ul {
   background-color: #f1f1f1;
 }
 
-/* --- MODAL STYLING (Diperbarui untuk Animasi) --- */
+/* --- Modal Styling --- */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -283,14 +305,11 @@ ul {
   justify-content: center;
   align-items: center;
   z-index: 1000;
-
-  /* Properti untuk animasi */
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-/* State saat modal aktif/terlihat */
 .modal-overlay.show {
   opacity: 1;
   visibility: visible;
@@ -303,13 +322,10 @@ ul {
   width: 90%;
   max-width: 500px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-
-  /* Posisi awal (sedikit di atas) */
   transform: translateY(-30px);
   transition: transform 0.4s ease;
 }
 
-/* Posisi akhir saat modal aktif */
 .modal-overlay.show .modal-container {
   transform: translateY(0);
 }
@@ -352,7 +368,9 @@ ul {
   color: #555;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
+  /* Menambahkan select agar gayanya sama */
   width: 100%;
   padding: 12px;
   border: 1px solid #ccc;
@@ -360,14 +378,12 @@ ul {
   font-family: "Poppins", sans-serif;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
+  /* Menambahkan select agar gayanya sama */
   outline: none;
   border-color: var(--accent-color);
   box-shadow: 0 0 5px rgba(0, 188, 212, 0.4);
-}
-
-.modal-overlay.hidden {
-  display: none;
 }
 
 /* --- Footer Styling --- */
@@ -395,7 +411,7 @@ ul {
   }
 
   .sidebar-nav {
-    display: none; /* Disembunyikan di mobile, perlu menu hamburger untuk fungsionalitas penuh */
+    display: none;
   }
 
   .sidebar-header {
@@ -410,5 +426,96 @@ ul {
   .btn-primary {
     margin-top: 10px;
     width: 100%;
+  }
+}
+
+/* --- Styling untuk Modal Konfirmasi Hapus --- */
+.modal-body {
+  padding: 20px 0;
+  line-height: 1.7;
+  color: #555;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Memberi gaya dasar untuk tombol Batal agar tidak berwarna */
+.modal-footer .btn {
+  background-color: #f1f1f1;
+  color: #333;
+}
+
+.modal-footer .btn:hover {
+  background-color: #e0e0e0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Tombol Hapus akan tetap menggunakan gaya .btn-delete */
+.modal-footer .btn-delete {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+/* ========================================= */
+/* ===         DESAIN RESPONSIVE         === */
+/* ========================================= */
+
+/* Aturan ini akan berlaku untuk layar dengan lebar 768px atau kurang (ukuran tablet & mobile) */
+@media (max-width: 768px) {
+  /* 1. Mengubah layout utama dari menyamping menjadi vertikal (atas-bawah) */
+  .container {
+    flex-direction: column;
+  }
+
+  /* 2. Menyesuaikan sidebar agar menjadi seperti header bar di atas */
+  .sidebar {
+    width: 100%;
+    min-height: auto; /* Hapus tinggi minimum agar ukurannya pas */
+    height: auto;
+  }
+
+  /* Menyembunyikan menu dropdown di mobile untuk simpel (opsional, bisa dikembangkan dengan menu hamburger) */
+  .sidebar-nav {
+    display: none;
+  }
+  .sidebar-header {
+    border-bottom: none; /* Hapus border bawah di header sidebar */
+    text-align: left;
+    padding-left: 20px;
+  }
+
+  /* 3. Menumpuk judul halaman dan tombol "Tambah Data" secara vertikal */
+  .content-header {
+    flex-direction: column;
+    align-items: flex-start; /* Ratakan semua ke kiri */
+    gap: 15px; /* Beri jarak antara judul dan tombol */
+  }
+
+  /* 4. Membuat tombol "Tambah" memenuhi lebar layar agar mudah disentuh */
+  .content-header .btn-primary {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+  }
+
+  /* 5. Mengurangi padding pada konten utama agar lebih lega di layar kecil */
+  .content {
+    padding: 15px;
+  }
+
+  /* 6. Mengurangi ukuran font judul utama di mobile */
+  .content h1 {
+    font-size: 1.8rem;
+  }
+
+  /* 7. Memberi sedikit padding pada footer */
+  .footer {
+    padding: 15px;
   }
 }
