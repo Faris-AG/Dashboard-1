@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Data Kelas - Dashboard Akademik</title>
-    <link rel="stylesheet" href="style2.css" />
+    <link rel="stylesheet" href="style.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
       rel="stylesheet"
@@ -50,6 +50,14 @@
             </button>
           </div>
 
+          <div class="search-container">
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Cari berdasarkan nama kelas atau wali kelas..."
+            />
+          </div>
+
           <div class="data-table-container">
             <table class="data-table">
               <thead>
@@ -72,14 +80,14 @@
       </main>
     </div>
 
-    <div class="modal-overlay" id="form-modal-overlay">
-      <div class="modal-content">
+    <div class="modal-overlay" id="form-modal">
+      <div class="modal-container">
         <div class="modal-header">
           <h2 id="modal-title">Form Data Kelas</h2>
           <button class="close-button" id="close-modal">&times;</button>
         </div>
         <form id="kelas-form">
-          <input type="hidden" id="edit-row-index" />
+          <input type="hidden" id="edit-index" />
           <div class="form-group">
             <label for="nama-kelas">Nama Kelas</label>
             <input type="text" id="nama-kelas" required />
@@ -92,203 +100,222 @@
             <label for="jumlah-siswa">Jumlah Siswa</label>
             <input type="number" id="jumlah-siswa" required />
           </div>
-          <div class="form-actions">
-            <button type="button" class="btn btn-cancel" id="btn-batal">
-              Batal
-            </button>
-            <button type="submit" class="btn btn-primary">Simpan</button>
-          </div>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            style="width: 100%; padding: 12px"
+          >
+            Simpan
+          </button>
         </form>
       </div>
     </div>
 
+    <div class="modal-overlay" id="hapus-modal">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h2 id="hapus-modal-title">Konfirmasi Penghapusan</h2>
+          <button class="close-button" id="close-hapus-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p id="hapus-modal-text">
+            Apakah Anda benar-benar yakin ingin menghapus data ini? Tindakan ini
+            tidak dapat dibatalkan.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" id="btn-batal-hapus">Batal</button>
+          <button class="btn btn-delete" id="btn-konfirmasi-hapus">
+            Hapus
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script>
-      // Seluruh kode JavaScript tetap di sini, tidak ada perubahan
       document.addEventListener("DOMContentLoaded", function () {
-        // --- [START] Deklarasi Variabel DOM ---
         const dropdownToggle = document.querySelector(".dropdown-toggle");
-        const dataTable = document.querySelector(".data-table tbody");
-        const btnTambahKelas = document.getElementById("btn-tambah-kelas");
-
-        // Variabel untuk Modal
-        const modalOverlay = document.getElementById("form-modal-overlay");
-        const modalTitle = document.getElementById("modal-title");
-        const closeModalBtn = document.getElementById("close-modal");
-        const cancelBtn = document.getElementById("btn-batal");
-        const kelasForm = document.getElementById("kelas-form");
-
-        // Variabel untuk Form Input
-        const editRowIndexInput = document.getElementById("edit-row-index");
-        const namaKelasInput = document.getElementById("nama-kelas");
-        const waliKelasInput = document.getElementById("wali-kelas");
-        const jumlahSiswaInput = document.getElementById("jumlah-siswa");
-        // --- [END] Deklarasi Variabel DOM ---
-
-        // --- [START] Fungsi Utama Local Storage & Render Tabel ---
-        function muatData() {
-          const dataTersimpan = localStorage.getItem("dataKelas");
-          dataTable.innerHTML = ""; // Kosongkan tabel sebelum memuat
-
-          // Data contoh jika local storage kosong
-          let data = dataTersimpan
-            ? JSON.parse(dataTersimpan)
-            : [
-                {
-                  namaKelas: "10 PPLG 3",
-                  waliKelas: "Drs. John Doe",
-                  jumlahSiswa: "36",
-                },
-                {
-                  namaKelas: "11 TJKT 1",
-                  waliKelas: "Jane Smith, S.Kom",
-                  jumlahSiswa: "35",
-                },
-                {
-                  namaKelas: "12 DKV 2",
-                  waliKelas: "Michael Bayu, S.Ds",
-                  jumlahSiswa: "34",
-                },
-              ];
-
-          data.forEach((item) => {
-            tambahBarisKeTabel(item);
-          });
-          perbaruiNomorUrut();
-          // Simpan data contoh jika local storage awalnya kosong
-          if (!dataTersimpan) {
-            simpanData();
-          }
-        }
-
-        function simpanData() {
-          const rows = dataTable.querySelectorAll("tr");
-          const dataUntukDisimpan = [];
-          rows.forEach((row) => {
-            const cells = row.querySelectorAll("td");
-            const dataKelas = {
-              namaKelas: cells[1].textContent,
-              waliKelas: cells[2].textContent,
-              jumlahSiswa: cells[3].textContent,
-            };
-            dataUntukDisimpan.push(dataKelas);
-          });
-          localStorage.setItem("dataKelas", JSON.stringify(dataUntukDisimpan));
-        }
-
-        function tambahBarisKeTabel(data) {
-          const newRow = dataTable.insertRow();
-          newRow.innerHTML = `
-            <td></td> <td>${data.namaKelas}</td>
-            <td>${data.waliKelas}</td>
-            <td>${data.jumlahSiswa}</td>
-            <td>
-              <button class="btn btn-edit">Edit</button>
-              <button class="btn btn-delete">Hapus</button>
-            </td>
-          `;
-        }
-
-        function perbaruiNomorUrut() {
-          const rows = dataTable.querySelectorAll("tr");
-          rows.forEach((row, index) => {
-            row.querySelector("td:first-child").textContent = index + 1;
-          });
-        }
-        // --- [END] Fungsi Utama Local Storage & Render Tabel ---
-
-        // --- [START] Logika Modal & Form ---
-        function tampilkanModal() {
-          modalOverlay.classList.add("active");
-        }
-
-        function sembunyikanModal() {
-          modalOverlay.classList.remove("active");
-        }
-
-        btnTambahKelas.addEventListener("click", function () {
-          kelasForm.reset(); // Kosongkan form
-          editRowIndexInput.value = ""; // Pastikan mode tambah
-          modalTitle.textContent = "Tambah Kelas Baru";
-          tampilkanModal();
-        });
-
-        closeModalBtn.addEventListener("click", sembunyikanModal);
-        cancelBtn.addEventListener("click", sembunyikanModal);
-        modalOverlay.addEventListener("click", function (event) {
-          if (event.target === modalOverlay) {
-            sembunyikanModal();
-          }
-        });
-
-        kelasForm.addEventListener("submit", function (event) {
-          event.preventDefault(); // Mencegah form submit default
-
-          const dataBaru = {
-            namaKelas: namaKelasInput.value,
-            waliKelas: waliKelasInput.value,
-            jumlahSiswa: jumlahSiswaInput.value,
-          };
-
-          const rowIndex = editRowIndexInput.value;
-
-          if (rowIndex === "") {
-            // Mode Tambah
-            tambahBarisKeTabel(dataBaru);
-          } else {
-            // Mode Edit
-            const row = dataTable.rows[parseInt(rowIndex)];
-            row.cells[1].textContent = dataBaru.namaKelas;
-            row.cells[2].textContent = dataBaru.waliKelas;
-            row.cells[3].textContent = dataBaru.jumlahSiswa;
-          }
-
-          perbaruiNomorUrut();
-          simpanData();
-          sembunyikanModal();
-        });
-        // --- [END] Logika Modal & Form ---
-
-        // --- [START] Logika Aksi Edit & Hapus ---
-        dataTable.addEventListener("click", function (event) {
-          const target = event.target;
-          const row = target.closest("tr");
-          if (!row) return;
-
-          if (target.classList.contains("btn-edit")) {
-            // Ambil data dari baris yang diklik
-            const cells = row.querySelectorAll("td");
-            namaKelasInput.value = cells[1].textContent;
-            waliKelasInput.value = cells[2].textContent;
-            jumlahSiswaInput.value = cells[3].textContent;
-
-            // Simpan index baris (dimulai dari 0)
-            editRowIndexInput.value = row.rowIndex - 1;
-
-            modalTitle.textContent = "Edit Data Kelas";
-            tampilkanModal();
-          } else if (target.classList.contains("btn-delete")) {
-            const namaKelas = row.querySelector("td:nth-child(2)").textContent;
-            if (
-              confirm(
-                `Apakah Anda yakin ingin menghapus data kelas ${namaKelas}?`
-              )
-            ) {
-              row.remove();
-              perbaruiNomorUrut();
-              simpanData();
-            }
-          }
-        });
-        // --- [END] Logika Aksi Edit & Hapus ---
-
-        // --- Inisialisasi awal ---
         if (dropdownToggle) {
           dropdownToggle.addEventListener("click", function (event) {
             event.preventDefault();
             this.parentElement.classList.toggle("active");
           });
         }
-        muatData(); // Muat data saat halaman dibuka
+
+        const dataTable = document.querySelector(".data-table tbody");
+        const btnTambahKelas = document.getElementById("btn-tambah-kelas");
+        const searchInput = document.getElementById("search-input");
+
+        const modalOverlay = document.getElementById("form-modal");
+        const modalTitle = document.getElementById("modal-title");
+        const closeModalBtn = document.getElementById("close-modal");
+        const kelasForm = document.getElementById("kelas-form");
+        const editIndexInput = document.getElementById("edit-index");
+        const namaKelasInput = document.getElementById("nama-kelas");
+        const waliKelasInput = document.getElementById("wali-kelas");
+        const jumlahSiswaInput = document.getElementById("jumlah-siswa");
+
+        const hapusModalOverlay = document.getElementById("hapus-modal");
+        const hapusModalText = document.getElementById("hapus-modal-text");
+        const btnKonfirmasiHapus = document.getElementById(
+          "btn-konfirmasi-hapus"
+        );
+        const btnBatalHapus = document.getElementById("btn-batal-hapus");
+        const closeHapusModalBtn = document.getElementById("close-hapus-modal");
+        let indexToDelete = null;
+
+        function muatData() {
+          const searchTerm = searchInput.value.toLowerCase();
+          let data = JSON.parse(localStorage.getItem("dataKelas")) || [];
+
+          if (data.length === 0) {
+            data = [
+              {
+                namaKelas: "10 PPLG 3",
+                waliKelas: "Drs. John Doe",
+                jumlahSiswa: "36",
+              },
+              {
+                namaKelas: "11 TJKT 1",
+                waliKelas: "Jane Smith, S.Kom",
+                jumlahSiswa: "35",
+              },
+              {
+                namaKelas: "12 DKV 2",
+                waliKelas: "Michael Bayu, S.Ds",
+                jumlahSiswa: "34",
+              },
+            ];
+            localStorage.setItem("dataKelas", JSON.stringify(data));
+          }
+
+          dataTable.innerHTML = "";
+
+          const dataFiltered = data.filter(
+            (item) =>
+              item.namaKelas.toLowerCase().includes(searchTerm) ||
+              item.waliKelas.toLowerCase().includes(searchTerm)
+          );
+
+          if (dataFiltered.length > 0) {
+            dataFiltered.forEach((item, index) => {
+              const originalIndex = data.findIndex(
+                (d) =>
+                  d.namaKelas === item.namaKelas &&
+                  d.waliKelas === item.waliKelas
+              );
+              const newRow = dataTable.insertRow();
+              newRow.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${item.namaKelas}</td>
+            <td>${item.waliKelas}</td>
+            <td>${item.jumlahSiswa}</td>
+            <td>
+              <button class="btn btn-edit" data-index="${originalIndex}">Edit</button>
+              <button class="btn btn-delete" data-index="${originalIndex}">Hapus</button>
+            </td>
+          `;
+            });
+          } else {
+            const newRow = dataTable.insertRow();
+            newRow.innerHTML = `<td colspan="5" style="text-align: center;">Tidak ada data yang cocok.</td>`;
+          }
+        }
+
+        function bukaModal(mode, data = {}, index = -1) {
+          kelasForm.reset();
+          if (mode === "tambah") {
+            modalTitle.textContent = "Tambah Kelas Baru";
+            editIndexInput.value = -1;
+          } else {
+            modalTitle.textContent = "Edit Data Kelas";
+            namaKelasInput.value = data.namaKelas;
+            waliKelasInput.value = data.waliKelas;
+            jumlahSiswaInput.value = data.jumlahSiswa;
+            editIndexInput.value = index;
+          }
+          modalOverlay.classList.add("show");
+        }
+
+        function tutupModal() {
+          modalOverlay.classList.remove("show");
+        }
+
+        kelasForm.addEventListener("submit", function (event) {
+          event.preventDefault();
+          const dataBaru = {
+            namaKelas: namaKelasInput.value,
+            waliKelas: waliKelasInput.value,
+            jumlahSiswa: jumlahSiswaInput.value,
+          };
+          const indexToEdit = parseInt(editIndexInput.value);
+          let data = JSON.parse(localStorage.getItem("dataKelas")) || [];
+          if (indexToEdit === -1) {
+            data.push(dataBaru);
+          } else {
+            data[indexToEdit] = dataBaru;
+          }
+          localStorage.setItem("dataKelas", JSON.stringify(data));
+          muatData();
+          tutupModal();
+        });
+
+        function tampilkanModalHapus(index) {
+          const data = JSON.parse(localStorage.getItem("dataKelas"));
+          const namaKelas = data[index].namaKelas;
+          hapusModalText.textContent = `Apakah Anda yakin ingin menghapus data kelas ${namaKelas}? Tindakan ini tidak dapat dibatalkan.`;
+          indexToDelete = index;
+          hapusModalOverlay.classList.add("show");
+        }
+
+        function tutupModalHapus() {
+          indexToDelete = null;
+          hapusModalOverlay.classList.remove("show");
+        }
+
+        btnTambahKelas.addEventListener("click", () => bukaModal("tambah"));
+        closeModalBtn.addEventListener("click", tutupModal);
+
+        // [DIHAPUS] Event listener untuk klik di luar modal form
+        // modalOverlay.addEventListener("click", (e) => {
+        //   if (e.target === modalOverlay) tutupModal();
+        // });
+
+        searchInput.addEventListener("input", muatData);
+
+        dataTable.addEventListener("click", function (event) {
+          const target = event.target;
+          if (target.classList.contains("btn-edit")) {
+            const index = target.dataset.index;
+            const data = JSON.parse(localStorage.getItem("dataKelas"));
+            bukaModal("edit", data[index], index);
+          } else if (target.classList.contains("btn-delete")) {
+            const index = target.dataset.index;
+            tampilkanModalHapus(index);
+          }
+        });
+
+        btnKonfirmasiHapus.addEventListener("click", function () {
+          if (indexToDelete !== null) {
+            let data = JSON.parse(localStorage.getItem("dataKelas"));
+            data.splice(indexToDelete, 1);
+            localStorage.setItem("dataKelas", JSON.stringify(data));
+            muatData();
+            tutupModalHapus();
+          }
+        });
+
+        btnBatalHapus.addEventListener("click", tutupModalHapus);
+        closeHapusModalBtn.addEventListener("click", tutupModalHapus);
+
+        // [DIHAPUS] Event listener untuk klik di luar modal hapus
+        // hapusModalOverlay.addEventListener("click", (event) => {
+        //     if (event.target === hapusModalOverlay) {
+        //         tutupModalHapus();
+        //     }
+        // });
+
+        muatData();
       });
     </script>
   </body>
