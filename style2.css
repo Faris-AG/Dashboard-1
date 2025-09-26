@@ -390,3 +390,59 @@ ul {
     width: 100%;
   }
 }
+
+/* === CSS UNTUK SEARCH BAR (Tambahkan ke style.css Anda) === */
+
+.search-container {
+  margin-bottom: 20px;
+}
+
+#search-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  box-sizing: border-box;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+#search-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 5px rgba(0, 188, 212, 0.4);
+}
+
+/* --- Styling untuk Modal Konfirmasi Hapus --- */
+.modal-body {
+  padding: 20px 0;
+  line-height: 1.7;
+  color: #555;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Memberi gaya dasar untuk tombol Batal agar tidak berwarna */
+.modal-footer .btn {
+  background-color: #f1f1f1;
+  color: #333;
+}
+
+.modal-footer .btn:hover {
+  background-color: #e0e0e0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Tombol Hapus akan tetap menggunakan gaya .btn-delete */
+.modal-footer .btn-delete {
+  background-color: var(--danger-color);
+  color: white;
+}
