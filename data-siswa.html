@@ -4,9 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Data Siswa - Dashboard Akademik</title>
-
     <link rel="stylesheet" href="style.css" />
-
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
@@ -50,6 +48,14 @@
             <button class="btn btn-primary" id="btn-tambah-siswa">
               Tambah Siswa
             </button>
+          </div>
+
+          <div class="search-container">
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Cari siswa berdasarkan nama..."
+            />
           </div>
 
           <div class="data-table-container">
@@ -103,16 +109,11 @@
           </div>
           <div class="form-group">
             <label for="kelas">Kelas</label>
-            <input type="text" id="kelas" required placeholder="Contoh: 10" />
+            <select id="kelas" required></select>
           </div>
           <div class="form-group">
             <label for="jurusan">Jurusan</label>
-            <input
-              type="text"
-              id="jurusan"
-              required
-              placeholder="Contoh: PPLG 3"
-            />
+            <select id="jurusan" required></select>
           </div>
           <button
             type="submit"
@@ -122,6 +123,27 @@
             Simpan
           </button>
         </form>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="hapus-modal">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h2 id="hapus-modal-title">Konfirmasi Penghapusan</h2>
+          <button class="close-button" id="close-hapus-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p id="hapus-modal-text">
+            Apakah Anda benar-benar yakin ingin menghapus data ini? Tindakan ini
+            tidak dapat dibatalkan.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" id="btn-batal-hapus">Batal</button>
+          <button class="btn btn-delete" id="btn-konfirmasi-hapus">
+            Hapus
+          </button>
+        </div>
       </div>
     </div>
 
@@ -140,91 +162,88 @@
         // --- Variabel Global untuk DOM ---
         const dataTable = document.querySelector(".data-table tbody");
         const btnTambahSiswa = document.getElementById("btn-tambah-siswa");
+        const searchInput = document.getElementById("search-input");
 
-        // --- Variabel untuk Modal (BARU) ---
+        // --- Variabel untuk Modal Form Siswa---
         const modalOverlay = document.getElementById("siswa-modal");
         const modalTitle = document.getElementById("modal-title");
         const closeModalBtn = document.getElementById("close-modal");
         const siswaForm = document.getElementById("siswa-form");
         const editIndexInput = document.getElementById("edit-index");
 
-        // --- Fungsi Utama Local Storage (Sama seperti sebelumnya) ---
+        // --- Variabel untuk Modal Konfirmasi Hapus ---
+        const hapusModalOverlay = document.getElementById("hapus-modal");
+        const hapusModalText = document.getElementById("hapus-modal-text");
+        const btnKonfirmasiHapus = document.getElementById(
+          "btn-konfirmasi-hapus"
+        );
+        const btnBatalHapus = document.getElementById("btn-batal-hapus");
+        const closeHapusModalBtn = document.getElementById("close-hapus-modal");
+        let indexToDelete = null;
 
-        /**
-         * Mengambil data siswa dari Local Storage dan merender tabel.
-         */
         function muatData() {
-          const dataTersimpan = localStorage.getItem("dataSiswa");
-          // Hapus baris data yang ada di tabel
+          const searchTerm = searchInput.value.toLowerCase();
+          const dataTersimpan =
+            JSON.parse(localStorage.getItem("dataSiswa")) || [];
           dataTable.innerHTML = "";
 
-          if (dataTersimpan) {
-            const data = JSON.parse(dataTersimpan);
-            if (data.length > 0) {
-              data.forEach((item, index) => {
-                const newRow = dataTable.insertRow();
-                newRow.innerHTML = `
-                  <td>${index + 1}</td>
-                  <td>${item.nis}</td>
-                  <td>${item.nama}</td>
-                  <td>${item.kelas}</td>
-                  <td>${item.jurusan}</td>
-                  <td>
-                    <button class="btn btn-edit" data-index="${index}">Edit</button>
-                    <button class="btn btn-delete" data-index="${index}">Hapus</button>
-                  </td>
-                `;
-              });
-            } else {
-              // Tampilkan pesan jika tidak ada data
+          const dataFiltered = dataTersimpan.filter((item) =>
+            item.nama.toLowerCase().includes(searchTerm)
+          );
+
+          if (dataFiltered.length > 0) {
+            dataFiltered.forEach((item, index) => {
+              const originalIndex = dataTersimpan.findIndex(
+                (originalItem) => originalItem.nis === item.nis
+              );
               const newRow = dataTable.insertRow();
-              newRow.innerHTML = `<td colspan="6" style="text-align: center;">Tidak ada data siswa.</td>`;
-            }
+              newRow.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${item.nis}</td>
+            <td>${item.nama}</td>
+            <td>${item.kelas}</td>
+            <td>${item.jurusan}</td>
+            <td>
+              <button class="btn btn-edit" data-index="${originalIndex}">Edit</button>
+              <button class="btn btn-delete" data-index="${originalIndex}">Hapus</button>
+            </td>
+          `;
+            });
           } else {
-            // Tampilkan pesan jika local storage kosong
             const newRow = dataTable.insertRow();
-            newRow.innerHTML = `<td colspan="6" style="text-align: center;">Tidak ada data siswa.</td>`;
+            let message = "Tidak ada data siswa.";
+            if (searchTerm) {
+              message = `Tidak ada data siswa dengan nama "${searchInput.value}".`;
+            }
+            newRow.innerHTML = `<td colspan="6" style="text-align: center;">${message}</td>`;
           }
         }
-
-        /**
-         * Menyimpan data dari tabel ke Local Storage.
-         */
-        function simpanData() {
-          const rows = dataTable.querySelectorAll("tr");
-          const dataUntukDisimpan = [];
-
-          // Cek jika baris berisi pesan "Tidak ada data"
-          if (rows.length === 1 && rows[0].querySelector('td[colspan="6"]')) {
-            localStorage.setItem("dataSiswa", JSON.stringify([]));
-            return;
-          }
-
-          rows.forEach((row) => {
-            const cells = row.querySelectorAll("td");
-            const dataSiswa = {
-              nis: cells[1].textContent,
-              nama: cells[2].textContent,
-              kelas: cells[3].textContent,
-              jurusan: cells[4].textContent,
-            };
-            dataUntukDisimpan.push(dataSiswa);
-          });
-
-          localStorage.setItem("dataSiswa", JSON.stringify(dataUntukDisimpan));
-          // Muat ulang data untuk memastikan nomor urut dan tampilan konsisten
-          muatData();
-        }
-
-        // Panggil fungsi muatData() saat halaman pertama kali dibuka
-        muatData();
-
-        // --- Logika Modal (BARU) ---
-
-        // --- Logika Modal (Diperbarui untuk Animasi) ---
 
         function bukaModal(mode, data = {}, index = -1) {
-          siswaForm.reset(); // Bersihkan form
+          siswaForm.reset();
+          const kelasSelect = document.getElementById("kelas");
+          const jurusanSelect = document.getElementById("jurusan");
+          kelasSelect.innerHTML = '<option value="">Pilih Kelas...</option>';
+          jurusanSelect.innerHTML =
+            '<option value="">Pilih Jurusan...</option>';
+
+          const dataKelas = JSON.parse(localStorage.getItem("dataKelas")) || [];
+          dataKelas.forEach((kelas) => {
+            const option = document.createElement("option");
+            option.value = kelas.namaKelas;
+            option.textContent = kelas.namaKelas;
+            kelasSelect.appendChild(option);
+          });
+
+          const dataJurusan =
+            JSON.parse(localStorage.getItem("dataJurusan")) || [];
+          dataJurusan.forEach((jurusan) => {
+            const option = document.createElement("option");
+            option.value = jurusan.nama;
+            option.textContent = jurusan.nama;
+            jurusanSelect.appendChild(option);
+          });
+
           if (mode === "tambah") {
             modalTitle.textContent = "Tambah Data Siswa";
             editIndexInput.value = -1;
@@ -232,63 +251,65 @@
             modalTitle.textContent = "Edit Data Siswa";
             document.getElementById("nis").value = data.nis;
             document.getElementById("nama").value = data.nama;
-            document.getElementById("kelas").value = data.kelas;
-            document.getElementById("jurusan").value = data.jurusan;
+            kelasSelect.value = data.kelas;
+            jurusanSelect.value = data.jurusan;
             editIndexInput.value = index;
           }
-          // Ganti .remove("hidden") menjadi .add("show")
           modalOverlay.classList.add("show");
         }
 
         function tutupModal() {
-          // Ganti .add("hidden") menjadi .remove("show")
           modalOverlay.classList.remove("show");
         }
 
-        // Event listener untuk membuka modal tambah
         btnTambahSiswa.addEventListener("click", () => bukaModal("tambah"));
-
-        // Event listener untuk menutup modal
         closeModalBtn.addEventListener("click", tutupModal);
-        modalOverlay.addEventListener("click", (event) => {
-          if (event.target === modalOverlay) {
-            tutupModal();
-          }
-        });
 
-        // Event listener untuk form submission (Tambah & Edit)
+        // [DIHAPUS] Event listener untuk klik di luar modal form
+        // modalOverlay.addEventListener("click", (event) => {
+        //   if (event.target === modalOverlay) {
+        //     tutupModal();
+        //   }
+        // });
+
         siswaForm.addEventListener("submit", function (event) {
-          event.preventDefault(); // Mencegah form reload halaman
-
+          event.preventDefault();
           const dataBaru = {
             nis: document.getElementById("nis").value,
             nama: document.getElementById("nama").value,
             kelas: document.getElementById("kelas").value,
             jurusan: document.getElementById("jurusan").value,
           };
-
           const indexToEdit = parseInt(editIndexInput.value);
-
+          const dataTersimpan =
+            JSON.parse(localStorage.getItem("dataSiswa")) || [];
           if (indexToEdit === -1) {
-            // Mode Tambah
-            const dataTersimpan =
-              JSON.parse(localStorage.getItem("dataSiswa")) || [];
+            const nisExists = dataTersimpan.some(
+              (siswa) => siswa.nis === dataBaru.nis
+            );
+            if (nisExists) {
+              alert("NIS sudah terdaftar. Silakan gunakan NIS lain.");
+              return;
+            }
             dataTersimpan.push(dataBaru);
-            localStorage.setItem("dataSiswa", JSON.stringify(dataTersimpan));
           } else {
-            // Mode Edit
-            const dataTersimpan = JSON.parse(localStorage.getItem("dataSiswa"));
+            const nisExists = dataTersimpan.some(
+              (siswa, index) =>
+                siswa.nis === dataBaru.nis && index !== indexToEdit
+            );
+            if (nisExists) {
+              alert(
+                "NIS sudah terdaftar untuk siswa lain. Silakan gunakan NIS lain."
+              );
+              return;
+            }
             dataTersimpan[indexToEdit] = dataBaru;
-            localStorage.setItem("dataSiswa", JSON.stringify(dataTersimpan));
           }
-
-          muatData(); // Render ulang tabel dengan data baru
-          tutupModal(); // Tutup modal setelah submit
+          localStorage.setItem("dataSiswa", JSON.stringify(dataTersimpan));
+          muatData();
+          tutupModal();
         });
 
-        // --- Modifikasi Logika Aksi agar Terintegrasi dengan Modal & Local Storage ---
-
-        // Event listener untuk tombol "Edit" dan "Hapus" pada tabel
         dataTable.addEventListener("click", function (event) {
           if (event.target.classList.contains("btn-edit")) {
             const index = event.target.dataset.index;
@@ -297,25 +318,45 @@
             bukaModal("edit", dataSiswa, index);
           } else if (event.target.classList.contains("btn-delete")) {
             const index = event.target.dataset.index;
-            hapusSiswa(index);
+            tampilkanModalHapus(index);
           }
         });
 
-        // Fungsi untuk menghapus data siswa
-        function hapusSiswa(index) {
+        function tampilkanModalHapus(index) {
           const dataTersimpan = JSON.parse(localStorage.getItem("dataSiswa"));
           const namaSiswa = dataTersimpan[index].nama;
-
-          if (
-            confirm(
-              `Apakah Anda yakin ingin menghapus data siswa bernama ${namaSiswa}?`
-            )
-          ) {
-            dataTersimpan.splice(index, 1); // Hapus data dari array
-            localStorage.setItem("dataSiswa", JSON.stringify(dataTersimpan)); // Simpan array baru
-            muatData(); // Muat ulang data di tabel
-          }
+          hapusModalText.textContent = `Apakah Anda yakin ingin menghapus data siswa bernama ${namaSiswa}? Tindakan ini tidak dapat dibatalkan.`;
+          indexToDelete = index;
+          hapusModalOverlay.classList.add("show");
         }
+
+        function tutupModalHapus() {
+          indexToDelete = null;
+          hapusModalOverlay.classList.remove("show");
+        }
+
+        btnKonfirmasiHapus.addEventListener("click", function () {
+          if (indexToDelete !== null) {
+            const dataTersimpan = JSON.parse(localStorage.getItem("dataSiswa"));
+            dataTersimpan.splice(indexToDelete, 1);
+            localStorage.setItem("dataSiswa", JSON.stringify(dataTersimpan));
+            muatData();
+            tutupModalHapus();
+          }
+        });
+
+        btnBatalHapus.addEventListener("click", tutupModalHapus);
+        closeHapusModalBtn.addEventListener("click", tutupModalHapus);
+
+        // [DIHAPUS] Event listener untuk klik di luar modal hapus
+        // hapusModalOverlay.addEventListener("click", (event) => {
+        //     if (event.target === hapusModalOverlay) {
+        //         tutupModalHapus();
+        //     }
+        // });
+
+        muatData();
+        searchInput.addEventListener("input", muatData);
       });
     </script>
   </body>
