@@ -15,6 +15,7 @@
       <aside class="sidebar">
         <div class="sidebar-header">
           <h2>Akademik</h2>
+          <button class="close-button" id="close-sidebar-btn">&times;</button>
         </div>
         <nav class="sidebar-nav">
           <ul>
@@ -33,6 +34,11 @@
 
       <main class="main-content">
         <header class="header">
+          <button class="hamburger-menu" id="hamburger-menu">
+            <span class="hamburger-bar"></span>
+            <span class="hamburger-bar"></span>
+            <span class="hamburger-bar"></span>
+          </button>
           <div class="header-logo">
             <h3>Data Siswa</h3>
           </div>
@@ -148,9 +154,26 @@
     </div>
 
     <script>
+      // Tambahkan kode ini di bagian atas script Anda
       document.addEventListener("DOMContentLoaded", function () {
-        // --- Bagian Navigasi Sidebar ---
+        // --- [BARU] Logika untuk Menu Hamburger ---
+        const hamburgerMenu = document.getElementById("hamburger-menu");
+        const sidebar = document.querySelector(".sidebar");
+        const closeSidebarBtn = document.getElementById("close-sidebar-btn");
+
+        // Event listener untuk membuka sidebar
+        hamburgerMenu.addEventListener("click", function () {
+          sidebar.classList.add("sidebar-open");
+        });
+
+        // Event listener untuk menutup sidebar
+        closeSidebarBtn.addEventListener("click", function () {
+          sidebar.classList.remove("sidebar-open");
+        });
+
+        // --- Bagian Navigasi Sidebar (kode ini sudah ada sebelumnya) ---
         const dropdownToggle = document.querySelector(".dropdown-toggle");
+        // ... sisa kode JavaScript Anda ...
         if (dropdownToggle) {
           dropdownToggle.addEventListener("click", function (event) {
             event.preventDefault();
