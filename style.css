@@ -519,3 +519,78 @@ ul {
     padding: 15px;
   }
 }
+
+/* ========================================= */
+/* ===      MENU HAMBURGER & SIDEBAR     === */
+/* ========================================= */
+
+/* 1. Styling Tombol Hamburger */
+.hamburger-menu {
+  display: none; /* Sembunyikan di desktop */
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  margin-right: 15px;
+  z-index: 1001; /* Pastikan di atas elemen lain */
+}
+
+.hamburger-bar {
+  display: block;
+  width: 25px;
+  height: 3px;
+  background-color: #333;
+  margin: 5px 0;
+  transition: all 0.3s ease-in-out;
+}
+
+/* 2. Styling Tombol Close di dalam Sidebar */
+#close-sidebar-btn {
+  display: none; /* Sembunyikan di desktop */
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 2.5rem; /* Ukuran ikon 'X' */
+  color: var(--primary-text);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* 3. Aturan Responsif untuk Mobile (di dalam Media Query yang sudah ada) */
+@media (max-width: 768px) {
+  /* Tampilkan tombol hamburger di mobile */
+  .hamburger-menu {
+    display: block;
+  }
+
+  /* Tampilkan tombol close di mobile */
+  #close-sidebar-btn {
+    display: block;
+  }
+
+  /* Ubah sidebar menjadi menu slide-in */
+  .sidebar {
+    position: fixed; /* Tetap di layar saat scroll */
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 250px; /* Lebar sidebar saat terbuka */
+    z-index: 1000;
+    /* Sembunyikan sidebar ke kiri layar */
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+  }
+
+  /* Kelas .sidebar-open akan ditambahkan via JavaScript */
+  .sidebar.sidebar-open {
+    /* Tampilkan sidebar dengan menggesernya ke posisi semula */
+    transform: translateX(0);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Hapus aturan lama yang tidak diperlukan lagi */
+  .sidebar-nav {
+    display: block !important;
+  }
+}
