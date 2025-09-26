@@ -527,6 +527,26 @@ ul {
     border-bottom: 1px solid #34495e; /* Tampilkan lagi border pemisah */
   }
 
+  /* --- Perbaikan untuk Dropdown di dalam Sidebar Mobile --- */
+  .sidebar-nav .dropdown-menu {
+    /* Perbaikan utama: Mengubah posisi dari 'absolute' menjadi 'static' */
+    position: static;
+
+    /* Menghilangkan efek bayangan yang mungkin ada di versi desktop */
+    box-shadow: none;
+
+    /* Memastikan lebarnya sesuai dengan sidebar */
+    width: 100%;
+
+    /* Pastikan warna latar belakang tetap sama */
+    background-color: var(--secondary-bg);
+  }
+
+  /* Sedikit penyesuaian agar link di dalam dropdown terlihat rapi */
+  .dropdown-menu li a {
+    border-bottom: 1px solid var(--border-color); /* Beri garis pemisah tipis */
+  }
+
   /* Pastikan dropdown berfungsi normal di dalam sidebar geser */
   .sidebar-nav .dropdown-menu,
   .nav-dropdown .dropdown-toggle::after {
