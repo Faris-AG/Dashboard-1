@@ -15,10 +15,11 @@
       <aside class="sidebar">
         <div class="sidebar-header">
           <h2>Akademik</h2>
+          <button class="close-button" id="close-sidebar-btn">&times;</button>
         </div>
         <nav class="sidebar-nav">
           <ul>
-            <li><a href="index.html">Beranda</a></li>
+            <li><a href="index.html" class="active">Beranda</a></li>
             <li class="nav-dropdown">
               <a href="#" class="dropdown-toggle">Data</a>
               <ul class="dropdown-menu">
@@ -33,6 +34,12 @@
 
       <main class="main-content">
         <header class="header">
+          <button class="hamburger-menu" id="hamburger-menu">
+            <span class="hamburger-bar"></span>
+            <span class="hamburger-bar"></span>
+            <span class="hamburger-bar"></span>
+          </button>
+
           <div class="header-logo">
             <h3>Dashboard</h3>
           </div>
@@ -80,31 +87,38 @@
           });
         }
 
-        // --- Logika untuk Menghitung Data di Dashboard ---
+        // --- [BARU] Logika untuk Menu Hamburger ---
+        const hamburgerMenu = document.getElementById("hamburger-menu");
+        const sidebar = document.querySelector(".sidebar");
+        const closeSidebarBtn = document.getElementById("close-sidebar-btn");
 
-        // 1. Pilih elemen paragraf tempat angka akan ditampilkan
+        // Event listener untuk membuka sidebar
+        hamburgerMenu.addEventListener("click", function () {
+          sidebar.classList.add("sidebar-open");
+        });
+
+        // Event listener untuk menutup sidebar
+        closeSidebarBtn.addEventListener("click", function () {
+          sidebar.classList.remove("sidebar-open");
+        });
+
+        // --- Logika untuk Menghitung Data di Dashboard ---
         const elJumlahSiswa = document.getElementById("jumlah-siswa");
         const elJumlahKelas = document.getElementById("jumlah-kelas");
         const elJumlahJurusan = document.getElementById("jumlah-jurusan");
 
-        // 2. Buat fungsi untuk mengambil & menghitung data dari localStorage
         function updateDashboardCounts() {
-          // Menghitung jumlah siswa
-          // Ambil data dari localStorage, jika tidak ada, anggap sebagai array kosong []
           const dataSiswa = JSON.parse(localStorage.getItem("dataSiswa")) || [];
           elJumlahSiswa.textContent = dataSiswa.length;
 
-          // Menghitung jumlah kelas
           const dataKelas = JSON.parse(localStorage.getItem("dataKelas")) || [];
           elJumlahKelas.textContent = dataKelas.length;
 
-          // Menghitung jumlah jurusan
           const dataJurusan =
             JSON.parse(localStorage.getItem("dataJurusan")) || [];
           elJumlahJurusan.textContent = dataJurusan.length;
         }
 
-        // 3. Panggil fungsi saat halaman selesai dimuat
         updateDashboardCounts();
       });
     </script>
